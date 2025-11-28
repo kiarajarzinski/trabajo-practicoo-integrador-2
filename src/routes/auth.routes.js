@@ -1,6 +1,13 @@
 import { Router } from "express";
-import { register } from "../controllers/auth.controller.js";
-import { login, register } from "../controllers/auth.controller.js";
+import {
+  login,
+  register,
+  logout,
+  updateAuthProfile,
+  getAuthProfile,
+} from "../controllers/auth.controller.js";
+
+import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const authRoutes = Router();
 
@@ -9,6 +16,10 @@ authRoutes.post("/register", register);
 
 authRoutes.post("/auth/login", login);
 
-authRoutes.post("/auth/logout", logout);
+authRoutes.post("/auth/logout", authMiddleware, logout);
+
+authRoutes.get("/auth/profile", authMiddleware, getAuthProfile, updateAuthProfile);
+
+
 
 export default authRoutes;

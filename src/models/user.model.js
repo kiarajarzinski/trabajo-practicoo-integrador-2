@@ -50,10 +50,22 @@ const userSchema = new Schema(
         required: false,
       },
     },
+        deletedAt: {
+      type: Date,
+      default: null,
+    },
   },
   {
     versionKey: false,
   }
 );
+userSchema.virtual("articles", {
+  ref: "Article",
+  localField: "_id",
+  foreignField: "author",
+  justOne: false,
+});
+
+userSchema.set("toJSON", { virtuals: true });
 
 export const UserModel = model("User", userSchema);

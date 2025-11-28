@@ -36,4 +36,18 @@ const articleSchema = new Schema(
   }
 );
 
+articleSchema.post("findByIdAndDelete", async (doc) => {
+  if (!doc) return;
+
+  const CommentModel = model("Comment");
+
+  await CommentModel.deleteMany({ article: doc._id });
+});
+
+articleSchema.virtual("comments", {
+  ref: "Comment",
+  localField: "_id",
+  foreignField: "article",
+});
+
 export const ArticleModel = model("Article", articleSchema);

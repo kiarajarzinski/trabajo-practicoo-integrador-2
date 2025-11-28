@@ -20,6 +20,17 @@ const tagSchema = new Schema(
     versionKey: false,
   }
 );
+
+tagSchema.post("findByIdAndDelete", async (doc) => {
+  if (!doc) return;
+
+  const ArticleModel = model("Article");
+
+  await ArticleModel.updateMany(
+    { tags: doc._id },
+    { $pull: { tags: doc._id } }
+  );
+});
 tagSchema.virtual("articles", {
   ref: "Article",
   localField: "_id",

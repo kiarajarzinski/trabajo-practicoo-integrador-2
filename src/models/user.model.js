@@ -59,6 +59,19 @@ const userSchema = new Schema(
     versionKey: false,
   }
 );
+
+userSchema.post("findByIdAndUpdate", async (doc) => {
+  if (!doc) return;
+
+  if (doc.deletedAt !== null) {
+    const ArticleModel = model("Article");
+    const CommentModel = model("Comment");
+
+    await ArticleModel.deleteMany({ author: doc._id });
+    await CommentModel.deleteMany({ author: doc._id });
+  }
+});
+
 userSchema.virtual("articles", {
   ref: "Article",
   localField: "_id",

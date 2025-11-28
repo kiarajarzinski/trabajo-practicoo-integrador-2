@@ -1,4 +1,6 @@
 import Router from "express";
+import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { adminMiddleware } from "../middlewares/adminMiddleware.js";
 import {
   getAllUsersWithArticles,
   getUserWithArticlesAndComments,
@@ -6,11 +8,12 @@ import {
   deleteUser
 } from "../controllers/user.controller.js";
 
+
 const userRoutes = Router();
 
-userRoutes.get("/users", getAllUsersWithArticles);
-userRoutes.get("/users/:id", getUserWithArticlesAndComments);
-userRoutes.put("/users/:id", updateUser);
-userRoutes.delete("/users/:id", deleteUser);
+userRoutes.get("/users", adminMiddleware, getAllUsersWithArticles);
+userRoutes.get("/users/:id", adminMiddleware, getUserWithArticlesAndComments);
+userRoutes.put("/users/:id", adminMiddleware, updateUser);
+userRoutes.delete("/users/:id", adminMiddleware, deleteUser);
 
 export default userRoutes;

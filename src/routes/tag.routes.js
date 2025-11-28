@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { adminMiddleware } from "../middlewares/adminMiddleware.js";
 import {
   createTag,
   deleteTag,
@@ -10,14 +11,14 @@ import {
 
 const tagRoutes = Router();
 
-tagRoutes.post("/tags", createTag);
+tagRoutes.post("/tags", adminMiddleware, createTag);
 
 tagRoutes.get("/tags", authMiddleware, getAllTags);
 
 tagRoutes.get("/tags/:id", authMiddleware, getTag);
 
-tagRoutes.put("/tags/:id", updateTag);
+tagRoutes.put("/tags/:id", adminMiddleware, updateTag);
 
-tagRoutes.delete("/tags/:id", deleteTag);
+tagRoutes.delete("/tags/:id", adminMiddleware, deleteTag);
 
 export default tagRoutes;

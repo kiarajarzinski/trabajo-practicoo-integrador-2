@@ -6,6 +6,7 @@ import {
   getUserLoggedComments,
   updateComment,
 } from "../controllers/comment.controller.js";
+import { commentOwnerAdminMiddleware } from "../middlewares/commentOwnerOrAdmin.js";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
 
 const commentRoutes = Router();
@@ -14,10 +15,24 @@ commentRoutes.post("/comments", authMiddleware, createComment);
 
 commentRoutes.get("/comments/article/:articleId", getArticleComments);
 
-commentRoutes.get("/comments/my", authMiddleware, getUserLoggedComments);
+commentRoutes.get(
+  "/comments/article/:articleId",
+  authMiddleware,
+  getArticleComments
+);
 
-commentRoutes.put("/comments/:id", updateComment);
+commentRoutes.put(
+  "/comments/:id",
+  authMiddleware,
+  commentOwnerAdminMiddleware,
+  updateComment
+);
 
-commentRoutes.delete("/comments/:id", deleteComment);
+commentRoutes.delete(
+  "/comments/:id",
+  authMiddleware,
+  commentOwnerAdminMiddleware,
+  deleteComment
+);
 
 export default commentRoutes;

@@ -1,5 +1,6 @@
 import { Router } from "express";
 import { authMiddleware } from "../middlewares/authMiddleware.js";
+import { articleOwnerAdminMiddleware } from "../middlewares/articleOwnerOrAdmin.js";
 import {
   createArticle,
   deleteArticle,
@@ -19,8 +20,18 @@ articleRoutes.get("/articles/my", authMiddleware, getUserLoggedArticles);
 
 articleRoutes.get("/articles/:id", authMiddleware, getArticle);
 
-articleRoutes.put("/articles/:id", updateArticle);
+articleRoutes.put(
+  "/articles/:id",
+  authMiddleware,
+  articleOwnerAdminMiddleware,
+  updateArticle
+);
 
-articleRoutes.delete("/articles/:id", deleteArticle);
+articleRoutes.delete(
+  "/articles/:id",
+  authMiddleware,
+  articleOwnerAdminMiddleware,
+  deleteArticle
+);
 
 export default articleRoutes;

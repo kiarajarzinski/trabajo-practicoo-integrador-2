@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { articleOwnerAdminMiddleware } from "../middlewares/articleOwnerOrAdmin.js";
 
 import {
   addTagToArticle,
@@ -11,12 +12,14 @@ const articleTagRoutes = Router();
 articleTagRoutes.post(
   "/articles/:articleId/tags/:tagId",
   authMiddleware,
-  addTagToArticle
+  addTagToArticle,
+  articleOwnerAdminMiddleware
 );
 
 articleTagRoutes.delete(
   "/articles/:articleId/tags/:tagId",
   authMiddleware,
+  articleOwnerAdminMiddleware,
   removeTagFromArticle
 );
 

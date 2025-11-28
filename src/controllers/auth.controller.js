@@ -1,14 +1,20 @@
 import { UserModel } from "../models/user.model.js";
+import { generateToken } from "../helpers/jwt.helper.js";
+import { hashPassword, comparePassword } from "../helpers/bcrypt.helper.js";
+import { matchedData } from "express-validator";
 
 export const register = async (req, res) => {
-  const { username, email, password, role, profile } = req.body;
   try {
+    const validatedData = matchedData(req);
+
+    const hashedPassword = await hashPassword(validatedData.password);
+
     const user = await UserModel.create({
-      username,
-      email,
-      password,
-      role,
-      profile,
+      username: validatedData.username,
+      email: validatedData.email,
+      password: hashedPassword,
+      role: validatedData.role,
+      profile: validatedData.profile,
     });
 
     if (user) {
@@ -20,11 +26,125 @@ export const register = async (req, res) => {
   } catch (err) {
     console.error("Server error", err);
     return res.status(500).json({
+      ok: false,
       message: "Server error",
     });
   }
 };
 
-export const loging = async (req, res) => {};
+export const login = async (req, res) => {
+  const { username, password } = req.body;
+  try {
+    const user = await UserModel.findOne({ username });
 
-export const logout = async (req, res) => {};
+    if (!user) {
+      return res.status(404).json({
+        ok: false,
+        message: "Username or password incorrect",
+      });
+    }
+
+    const validPassword = await comparePassword(password, user.password);
+
+    if (!validPassword) {
+      return res.status(404).json({
+        ok: false,
+        message: "Username or password incorrect",
+      });
+    }
+
+    const token = generateToken(user);
+
+    res.cookie("token", token, {
+      httpOnly: true,
+      maxAge: 1000 * 60 * 60,
+    });
+
+    return res.status(200).json({
+      ok: true,
+      message: "Loggin succesfuly",
+    });
+  } catch (err) {
+    console.error("Server error", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Server error",
+    });
+  }
+};
+
+
+export const logout = async (req, res) => {
+  try {
+    res.clearCookie("token");
+
+    return res.status(200).json({
+      ok: true,
+      message: "Logout succesfuly",
+    });
+  } catch (err) {
+    console.error("Server error", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const getAuthProfile = async (req, res) => {
+  try {
+    const userLogged = req.userLogged;
+
+    const profile = await UserModel.findOne({ _id: userLogged.id }).select(
+      "username profile _id"
+    );
+
+    if (profile) {
+      return res.status(200).json({
+        ok: true,
+        message: "Profile founded",
+        profile: profile,
+      });
+    }
+  } catch (err) {
+    console.error("Server error", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Server error",
+    });
+  }
+};
+
+export const updateAuthProfile = async (req, res) => {
+  try {
+    const validatedData = matchedData(req, { locations: ["body"] });
+
+    if (Object.keys(validatedData).length === 0) {
+      return res.status(400).json({
+        ok: false,
+        message: "Nothing to update",
+      });
+    }
+
+    const userLogged = req.userLogged;
+
+    const updatedProfile = await UserModel.findByIdAndUpdate(
+      userLogged.id,
+      { $set: { profile: validatedData } },
+      { new: true }
+    );
+
+    if (updatedProfile) {
+      return res.status(200).json({
+        ok: true,
+        message: "Profile updated",
+      });
+    }
+  } catch (err) {
+    console.error("Server error", err);
+    return res.status(500).json({
+      ok: false,
+      message: "Server error",
+    });
+  }
+};
